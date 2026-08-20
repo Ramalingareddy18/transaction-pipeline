@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Transaction Analytics & Anomaly Detection Portal</title>
+  
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: rgba(22, 31, 48, 0.75);
+      --card-border: rgba(255, 255, 255, 0.08);
+      --primary-accent: #6366f1;
+      --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+      --emerald-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      --rose-gradient: linear-gradient(135deg, #f43f5e 0%, #e11d48 100%);
+      --amber-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--bg-dark);
+      background-image: 
+        radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 42px;
+      height: 42px;
+      background: var(--primary-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+      box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .brand-text h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 700;
+      background: linear-gradient(90deg, #ffffff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .badge-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(16, 185, 129, 0.12);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 500;
+    }
+
+    .badge-status .pulse {
+      width: 8px;
+      height: 8px;
+      background-color: #34d399;
+      border-radius: 50%;
+      box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(52, 211, 153, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+    }
+
+    .btn-action {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.5rem 1rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .btn-action:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .kpi-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(99, 102, 241, 0.4);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .kpi-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--primary-gradient);
+    }
+
+    .kpi-card.emerald::before { background: var(--emerald-gradient); }
+    .kpi-card.rose::before { background: var(--rose-gradient); }
+    .kpi-card.amber::before { background: var(--amber-gradient); }
+
+    .kpi-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    .kpi-title {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .kpi-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      color: var(--primary-accent);
+    }
+
+    .kpi-value {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+
+    .kpi-subtext {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    /* Layout Grid */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .panel-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .chart-container {
+      position: relative;
+      height: 320px;
+      width: 100%;
+    }
+
+    /* Anomaly List */
+    .anomaly-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+    }
+
+    .anomaly-item {
+      background: rgba(244, 63, 94, 0.08);
+      border: 1px solid rgba(244, 63, 94, 0.2);
+      border-radius: 12px;
+      padding: 0.85rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .anomaly-item:hover {
+      background: rgba(244, 63, 94, 0.15);
+      border-color: rgba(244, 63, 94, 0.4);
+    }
+
+    .anomaly-info h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #fca5a5;
+    }
+
+    .anomaly-info p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .anomaly-tag {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      padding: 0.25rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Table Section */
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .search-box input {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--card-border);
+      color: var(--text-main);
+      padding: 0.6rem 1rem 0.6rem 2.5rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .search-box i {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+    }
+
+    .data-table-wrapper {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--card-border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+    }
+
+    tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .badge-cat {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .badge-anomaly {
+      background: rgba(244, 63, 94, 0.2);
+      color: #fda4af;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .badge-normal {
+      background: rgba(16, 185, 129, 0.15);
+      color: #6ee7b7;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.1);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-logo">
+        <i class="fa-solid fa-chart-line"></i>
+      </div>
+      <div class="brand-text">
+        <h1>Transaction Intelligence Portal</h1>
+        <p>Enterprise Real-Time Analytics & Machine Learning Anomaly Detection</p>
+      </div>
+    </div>
+    
+    <div class="header-actions">
+      <div class="badge-status">
+        <div class="pulse"></div>
+        <span>IsolationForest ML Active</span>
+      </div>
+      <button class="btn-action" onclick="fetchData()">
+        <i class="fa-solid fa-rotate-right"></i> Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <div class="container">
+    
+    <!-- KPI Row -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-header">
+          <span class="kpi-title">TOTAL VOLUME</span>
+          <div class="kpi-icon"><i class="fa-solid fa-money-bill-wave"></i></div>
+        </div>
+        <div class="kpi-value" id="kpi-total-volume">$0.00</div>
+        <div class="kpi-subtext">
+          <i class="fa-solid fa-arrow-trend-up" style="color: #34d399;"></i>
+          <span>Live sum of all processed transactions</span>
+        </div>
+      </div>
+
+      <div class="kpi-card emerald">
+        <div class="kpi-header">
+          <span class="kpi-title">TOTAL TRANSACTIONS</span>
+          <div class="kpi-icon"><i class="fa-solid fa-receipt"></i></div>
+        </div>
+        <div class="kpi-value" id="kpi-total-count">0</div>
+        <div class="kpi-subtext">
+          <i class="fa-solid fa-database" style="color: #6ee7b7;"></i>
+          <span>Records in PostgreSQL database</span>
+        </div>
+      </div>
+
+      <div class="kpi-card amber">
+        <div class="kpi-header">
+          <span class="kpi-title">AVERAGE TRANSACTION</span>
+          <div class="kpi-icon"><i class="fa-solid fa-calculator"></i></div>
+        </div>
+        <div class="kpi-value" id="kpi-avg-amount">$0.00</div>
+        <div class="kpi-subtext">
+          <i class="fa-solid fa-scale-balanced" style="color: #fbbf24;"></i>
+          <span>Mean transaction size</span>
+        </div>
+      </div>
+
+      <div class="kpi-card rose">
+        <div class="kpi-header">
+          <span class="kpi-title">ML ANOMALIES FLAGGED</span>
+          <div class="kpi-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        </div>
+        <div class="kpi-value" id="kpi-anomalies">0</div>
+        <div class="kpi-subtext">
+          <i class="fa-solid fa-triangle-exclamation" style="color: #f87171;"></i>
+          <span>Isolation Forest outlier detection</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts & Analytics Section -->
+    <div class="content-grid">
+      <!-- Category Chart -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">
+            <i class="fa-solid fa-chart-column" style="color: #818cf8;"></i>
+            Spending by Category
+          </h3>
+        </div>
+        <div class="chart-container">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Anomaly Alerts Panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <h3 class="panel-title">
+            <i class="fa-solid fa-bell" style="color: #f43f5e;"></i>
+            ML Flagged Anomalies
+          </h3>
+        </div>
+        <div class="anomaly-list" id="anomaly-list">
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Loading anomalies...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Detailed Table Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <h3 class="panel-title">
+          <i class="fa-solid fa-table-list" style="color: #34d399;"></i>
+          Transaction Data Explorer
+        </h3>
+      </div>
+
+      <div class="table-controls">
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="search-input" placeholder="Search transactions by category, description..." onkeyup="filterTable()">
+        </div>
+      </div>
+
+      <div class="data-table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Account</th>
+              <th>Amount</th>
+              <th>ML Risk Status</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <tr>
+              <td colspan="7" style="text-align: center; color: var(--text-muted);">Loading transactions data...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let allTransactions = [];
+    let anomalyMap = new Set();
+    let categoryChartInstance = null;
+
+    async function fetchData() {
+      try {
+        // Fetch global aggregate summary for full dataset stats
+        const sumRes = await fetch('/analytics/summary');
+        const summary = await sumRes.json();
+
+        // Fetch transactions for table & charts
+        const txRes = await fetch('/transactions?limit=1000');
+        const transactions = await txRes.json();
+        allTransactions = transactions;
+
+        // Fetch anomalies
+        const anomRes = await fetch('/analytics/anomalies');
+        const anomData = await anomRes.json();
+        const anomalies = anomData.anomalies || [];
+        
+        anomalyMap = new Set(anomalies.map(a => a.transaction_id));
+
+        updateKPIs(summary, anomalies);
+        renderCharts(transactions);
+        renderAnomalies(anomalies);
+        renderTable(transactions);
+      } catch (err) {
+        console.error("Error fetching data:", err);
+      }
+    }
+
+    function updateKPIs(summary, anomalies) {
+      const totalVolume = summary.total_amount || 0;
+      const totalCount = summary.transaction_count || 0;
+      const avgAmount = summary.average_amount || 0;
+
+      document.getElementById('kpi-total-volume').innerText = `$${totalVolume.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('kpi-total-count').innerText = totalCount.toLocaleString();
+      document.getElementById('kpi-avg-amount').innerText = `$${avgAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('kpi-anomalies').innerText = (anomalies.length || 0).toLocaleString();
+    }
+
+    function renderCharts(transactions) {
+      const categoryTotals = {};
+      transactions.forEach(t => {
+        const cat = t.category || 'Uncategorized';
+        categoryTotals[cat] = (categoryTotals[cat] || 0) + (parseFloat(t.amount) || 0);
+      });
+
+      const labels = Object.keys(categoryTotals);
+      const data = Object.values(categoryTotals);
+
+      const ctx = document.getElementById('categoryChart').getContext('2d');
+      if (categoryChartInstance) {
+        categoryChartInstance.destroy();
+      }
+
+      categoryChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Total Amount ($)',
+            data: data,
+            backgroundColor: [
+              'rgba(99, 102, 241, 0.85)',
+              'rgba(168, 85, 247, 0.85)',
+              'rgba(16, 185, 129, 0.85)',
+              'rgba(245, 158, 11, 0.85)',
+              'rgba(244, 63, 94, 0.85)'
+            ],
+            borderColor: 'rgba(255, 255, 255, 0.2)',
+            borderWidth: 1,
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            },
+            y: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8' }
+            }
+          }
+        }
+      });
+    }
+
+    function renderAnomalies(anomalies) {
+      const container = document.getElementById('anomaly-list');
+      container.innerHTML = '';
+
+      if (anomalies.length === 0) {
+        container.innerHTML = '<p style="color: #6ee7b7; font-size: 0.85rem;"><i class="fa-solid fa-circle-check"></i> No anomalies flagged by ML model.</p>';
+        return;
+      }
+
+      anomalies.forEach(anom => {
+        const item = document.createElement('div');
+        item.className = 'anomaly-item';
+        item.innerHTML = `
+          <div class="anomaly-info">
+            <h4>#${anom.transaction_id} - ${anom.description || 'Unknown'}</h4>
+            <p>Category: ${anom.category || 'N/A'} | Date: ${anom.date || 'N/A'}</p>
+          </div>
+          <div style="text-align: right;">
+            <div class="anomaly-tag">Anomalous</div>
+            <div style="font-size: 0.85rem; font-weight: 700; color: #ffffff; margin-top: 0.25rem;">
+              $${(parseFloat(anom.amount) || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}
+            </div>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function renderTable(transactions) {
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = '';
+
+      transactions.forEach(t => {
+        const isAnom = anomalyMap.has(t.transaction_id);
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>#${t.transaction_id}</strong></td>
+          <td>${t.date || '-'}</td>
+          <td>${t.description || '-'}</td>
+          <td><span class="badge-cat">${t.category || 'General'}</span></td>
+          <td>${t.account || '-'}</td>
+          <td><strong>$${(parseFloat(t.amount) || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
+          <td>
+            ${isAnom 
+              ? '<span class="badge-anomaly"><i class="fa-solid fa-triangle-exclamation"></i> Flagged Anomaly</span>' 
+              : '<span class="badge-normal"><i class="fa-solid fa-circle-check"></i> Normal</span>'}
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterTable() {
+      const query = document.getElementById('search-input').value.toLowerCase();
+      const filtered = allTransactions.filter(t => 
+        (t.description && t.description.toLowerCase().includes(query)) ||
+        (t.category && t.category.toLowerCase().includes(query)) ||
+        (t.account && t.account.toLowerCase().includes(query))
+      );
+      renderTable(filtered);
+    }
+
+    // Initial load
+    fetchData();
+  </script>
+</body>
+</html>
