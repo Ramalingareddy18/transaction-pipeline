@@ -163,49 +163,26 @@ curl "http://127.0.0.1:8000/transactions?limit=10&offset=0&category=Food"
 
 | Parameter | Type | Default | Required | Description |
 |-----------|------|---------|----------|-------------|
-| `limit` | integer | 10 | No | Records per page (1-100) |
+| `limit` | integer | 100 | No | Records per page (1-10000) |
 | `offset` | integer | 0 | No | Pagination offset |
 | `category` | string | None | No | Filter by category |
-| `start_date` | date | None | No | Filter from date (YYYY-MM-DD) |
-| `end_date` | date | None | No | Filter to date (YYYY-MM-DD) |
 
 **Response** (200 OK)
 ```json
-{
-  "count": 5000,
-  "limit": 10,
-  "offset": 0,
-  "data": [
-    {
-      "transaction_id": 1,
-      "date": "2026-08-01",
-      "description": "Coffee Shop",
-      "amount": -3.50,
-      "currency": "USD",
-      "category": "Food & Dining",
-      "account": "Personal Checking",
-      "transaction_type": "Debit",
-      "month": 8,
-      "year": 2026,
-      "created_at": "2026-08-01T10:30:00Z",
-      "updated_at": "2026-08-01T10:30:00Z"
-    },
-    {
-      "transaction_id": 2,
-      "date": "2026-08-01",
-      "description": "Salary Deposit",
-      "amount": 5000.00,
-      "currency": "USD",
-      "category": "Income",
-      "account": "Personal Checking",
-      "transaction_type": "Credit",
-      "month": 8,
-      "year": 2026,
-      "created_at": "2026-08-01T09:00:00Z",
-      "updated_at": "2026-08-01T09:00:00Z"
-    }
-  ]
-}
+[
+  {
+    "transaction_id": 1,
+    "date": "2026-08-01",
+    "description": "Coffee Shop",
+    "amount": -3.5,
+    "currency": "USD",
+    "category": "Food & Dining",
+    "account": "Personal Checking",
+    "transaction_type": "expense",
+    "month": 8,
+    "year": 2026
+  }
+]
 ```
 
 **Example Requests**
@@ -215,9 +192,6 @@ curl "http://127.0.0.1:8000/transactions?limit=20"
 
 # Get food category transactions
 curl "http://127.0.0.1:8000/transactions?category=Food"
-
-# Get transactions in date range
-curl "http://127.0.0.1:8000/transactions?start_date=2026-08-01&end_date=2026-08-31"
 
 # Get page 2 with 50 per page
 curl "http://127.0.0.1:8000/transactions?limit=50&offset=50"
@@ -250,11 +224,9 @@ curl http://127.0.0.1:8000/transactions/1
   "currency": "USD",
   "category": "Food & Dining",
   "account": "Personal Checking",
-  "transaction_type": "Debit",
+  "transaction_type": "expense",
   "month": 8,
-  "year": 2026,
-  "created_at": "2026-08-01T10:30:00Z",
-  "updated_at": "2026-08-01T10:30:00Z"
+  "year": 2026
 }
 ```
 
@@ -274,52 +246,21 @@ curl http://127.0.0.1:8000/transactions/1
 
 **Purpose**: Get aggregate transaction statistics
 
-**Request Parameters**
+**Request**
 ```bash
-curl "http://127.0.0.1:8000/analytics/summary?category=Food"
+curl "http://127.0.0.1:8000/analytics/summary"
 ```
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `category` | string | All | Filter by category |
 
 **Response** (200 OK)
 ```json
 {
-  "total_transactions": 5000,
-  "total_amount": 125000.50,
-  "average_amount": 25.00,
-  "median_amount": 15.00,
-  "min_amount": -5000.00,
-  "max_amount": 10000.00,
-  "std_deviation": 150.25,
-  "by_category": {
-    "Food & Dining": {
-      "count": 500,
-      "total": -1500.00,
-      "average": -3.00
-    },
-    "Transportation": {
-      "count": 300,
-      "total": -900.00,
-      "average": -3.00
-    },
-    "Income": {
-      "count": 12,
-      "total": 60000.00,
-      "average": 5000.00
-    }
-  },
-  "by_month": {
-    "2026-01": {
-      "count": 400,
-      "total": 10000.00
-    },
-    "2026-02": {
-      "count": 420,
-      "total": 10500.00
-    }
-  }
+  "total_amount": 125000.5,
+  "average_amount": 25.0,
+  "max_amount": 10000.0,
+  "min_amount": -5000.0,
+  "transaction_count": 5000,
+  "categories": 8,
+  "status": "ok"
 }
 ```
 
@@ -330,56 +271,31 @@ curl "http://127.0.0.1:8000/analytics/summary?category=Food"
 
 **Purpose**: Detect unusual transactions using ML
 
-**Request Parameters**
+**Request**
 ```bash
-curl "http://127.0.0.1:8000/analytics/anomalies?min_score=-50"
+curl "http://127.0.0.1:8000/analytics/anomalies"
 ```
-
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `min_score` | float | -100 | Minimum anomaly score (-100 to 0) |
-| `limit` | integer | 20 | Number of anomalies to return |
 
 **Response** (200 OK)
 ```json
 {
-  "anomalies_detected": 125,
-  "total_transactions": 5000,
-  "anomaly_percentage": 2.5,
-  "data": [
+  "count": 1,
+  "model": "IsolationForest",
+  "anomalies": [
     {
       "transaction_id": 2847,
       "date": "2026-07-15",
       "description": "Large Wire Transfer",
       "amount": -25000.00,
-      "currency": "USD",
       "category": "Transfers",
-      "account": "Personal Checking",
       "is_anomaly": true,
-      "anomaly_score": -87.5,
-      "severity": "high"
-    },
-    {
-      "transaction_id": 1502,
-      "date": "2026-06-20",
-      "description": "Unusual Charge",
-      "amount": 500.00,
-      "currency": "USD",
-      "category": "Other",
-      "account": "Credit Card",
-      "is_anomaly": true,
-      "anomaly_score": -65.3,
-      "severity": "medium"
+      "anomaly_score": -0.72
     }
-  ],
-  "timestamp": "2026-08-01T12:00:00Z"
+  ]
 }
 ```
 
-**Anomaly Severity**
-- `high`: Score < -70 (requires attention)
-- `medium`: Score -50 to -70 (review recommended)
-- `low`: Score > -50 (monitoring only)
+The response includes the model's raw Isolation Forest `score_samples` value. The API does not currently assign severity levels.
 
 ---
 
@@ -419,10 +335,10 @@ while True:
     )
     
     data = response.json()
-    all_transactions.extend(data['data'])
+    all_transactions.extend(data)
     
     # Check if more records
-    if len(data['data']) < limit:
+    if len(data) < limit:
         break
     
     offset += limit
@@ -438,13 +354,10 @@ import requests
 
 BASE_URL = "http://127.0.0.1:8000"
 
-# Get high-severity anomalies
-response = requests.get(
-    f"{BASE_URL}/analytics/anomalies",
-    params={"min_score": -80}
-)
+# Get anomalies
+response = requests.get(f"{BASE_URL}/analytics/anomalies")
 
-anomalies = response.json()['data']
+anomalies = response.json()['anomalies']
 
 # Alert on each anomaly
 for anomaly in anomalies:
@@ -467,7 +380,7 @@ response = requests.get(
     params={"category": "Food & Dining"}
 )
 
-transactions = response.json()['data']
+transactions = response.json()
 
 # Calculate totals
 total_spent = sum(t['amount'] for t in transactions)
@@ -514,12 +427,18 @@ Response:
 
 **Invalid Parameter**
 ```bash
-curl "http://127.0.0.1:8000/transactions?limit=1000"
+curl "http://127.0.0.1:8000/transactions?limit=10001"
 ```
 Response:
 ```json
 {
-  "detail": "limit must be between 1 and 100"
+  "detail": [
+    {
+      "type": "less_than_equal",
+      "loc": ["query", "limit"],
+      "msg": "Input should be less than or equal to 10000"
+    }
+  ]
 }
 ```
 

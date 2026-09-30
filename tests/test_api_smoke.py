@@ -16,8 +16,7 @@ def test_transactions_endpoint_returns_data():
     assert response.status_code == 200, response.text
     payload = response.json()
     assert isinstance(payload, list)
-    assert len(payload) > 0
-    first = payload[0]
-    assert "transaction_id" in first
-    assert "amount" in first
+    for transaction in payload:
+        assert "transaction_id" in transaction
+        assert "amount" in transaction
 

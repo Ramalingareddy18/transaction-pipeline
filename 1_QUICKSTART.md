@@ -229,7 +229,7 @@ python -m uvicorn app.main:app --host 127.0.0.1 --port 8001
 docker run -d \
   -e POSTGRES_DB=transaction_pipeline_db \
   -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=Rheb@117 \
+   -e POSTGRES_PASSWORD=replace-with-a-unique-local-password \
   -p 5432:5432 \
   postgres:16
 ```

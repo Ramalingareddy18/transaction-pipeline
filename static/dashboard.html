@@ -679,6 +679,17 @@
       });
     }
 
+    function escapeHtml(value) {
+      const replacements = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      };
+      return String(value ?? '').replace(/[&<>"']/g, character => replacements[character]);
+    }
+
     function renderAnomalies(anomalies) {
       const container = document.getElementById('anomaly-list');
       container.innerHTML = '';
@@ -693,8 +704,8 @@
         item.className = 'anomaly-item';
         item.innerHTML = `
           <div class="anomaly-info">
-            <h4>#${anom.transaction_id} - ${anom.description || 'Unknown'}</h4>
-            <p>Category: ${anom.category || 'N/A'} | Date: ${anom.date || 'N/A'}</p>
+            <h4>#${escapeHtml(anom.transaction_id)} - ${escapeHtml(anom.description || 'Unknown')}</h4>
+              <p>Category: ${escapeHtml(anom.category || 'N/A')} | Date: ${escapeHtml(anom.date || 'N/A')}</p>
           </div>
           <div style="text-align: right;">
             <div class="anomaly-tag">Anomalous</div>
@@ -715,11 +726,11 @@
         const isAnom = anomalyMap.has(t.transaction_id);
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td><strong>#${t.transaction_id}</strong></td>
-          <td>${t.date || '-'}</td>
-          <td>${t.description || '-'}</td>
-          <td><span class="badge-cat">${t.category || 'General'}</span></td>
-          <td>${t.account || '-'}</td>
+          <td><strong>#${escapeHtml(t.transaction_id)}</strong></td>
+          <td>${escapeHtml(t.date || '-')}</td>
+          <td>${escapeHtml(t.description || '-')}</td>
+          <td><span class="badge-cat">${escapeHtml(t.category || 'General')}</span></td>
+          <td>${escapeHtml(t.account || '-')}</td>
           <td><strong>$${(parseFloat(t.amount) || 0).toLocaleString('en-US', {minimumFractionDigits: 2})}</strong></td>
           <td>
             ${isAnom 

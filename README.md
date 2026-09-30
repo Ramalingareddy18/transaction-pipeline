@@ -10,7 +10,9 @@ A production-grade transaction processing and analytics platform built with Pyth
 - **Dashboard**: Interactive Streamlit dashboard for visualization
 - **Anomaly Detection**: ML-based detection using Isolation Forest
 - **Docker Deployment**: Complete containerized stack with health checks
-- **Production Ready**: Comprehensive logging, monitoring, and error handling
+- **Operational safeguards**: Configurable logging, health checks, and data validation
+
+> **Readiness note:** This is a development/reference implementation, not certified for production. Authentication, deployment security review, database backups/migrations, and a successful clean-environment CI run are still required before production use.
 
 ## Architecture
 
@@ -30,9 +32,9 @@ A production-grade transaction processing and analytics platform built with Pyth
                      ▼
 ┌─────────────────────────────────────────────────────────┐
 │              PostgreSQL Database                         │
-│  ┌─────────────┬──────────────┬─────────────┐           │
-│  │Transactions │Audit Logs    │Indexes      │           │
-│  └─────────────┴──────────────┴─────────────┘           │
+│  ┌─────────────────────────────────────────┐            │
+│  │ Transactions                             │            │
+│  └─────────────────────────────────────────┘            │
 └────────┬──────────────────────────────────┬──────────────┘
          │                                  │
          ▼                                  ▼
@@ -79,7 +81,7 @@ A production-grade transaction processing and analytics platform built with Pyth
 │   ├── smoke_test_e2e.py         # End-to-end validation
 │   ├── check_api.py              # API health check
 │   ├── create_db.py              # Database initialization
-│   ├── load_and_insert.py        # Bulk data loading
+│   ├── load_data.py              # Database loading helper
 │   └── init-db.sql               # SQL schema initialization
 ├── data/                         # Data directories
 │   ├── raw/                      # Raw CSV input
@@ -158,7 +160,7 @@ python src\database_connection.py
 python src\etl_pipeline.py
 ```
 
-Processes CSV files from `data/raw/` and loads into PostgreSQL. Output is saved to `data/processed/`.
+Processes a CSV file and saves the cleaned output to `data/processed/`. By default, records are upserted by `transaction_id` without removing unrelated rows. Set `ETL_REPLACE_ALL=true` only when you intentionally want to replace the entire transactions table; that mode deletes existing rows before loading the CSV.
 
 ### Start API Server
 

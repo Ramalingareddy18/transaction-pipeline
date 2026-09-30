@@ -34,7 +34,7 @@ DB_HOST=localhost
 DB_PORT=5432
 DB_NAME=transaction_pipeline_db
 DB_USER=postgres
-DB_PASSWORD=Rheb@117
+DB_PASSWORD=replace-with-a-unique-local-password
 
 # API Configuration
 API_HOST=127.0.0.1
@@ -73,7 +73,7 @@ notepad .env  # Windows
 
 ```python
 # ❌ BAD - Never do this
-DB_PASSWORD = "Rheb@117"
+DB_PASSWORD = "never-hardcode-a-real-secret"
 
 # ✅ GOOD - Use environment variables
 from dotenv import load_dotenv

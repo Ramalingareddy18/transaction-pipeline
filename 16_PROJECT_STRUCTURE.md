@@ -30,7 +30,7 @@ transaction-pipeline/
 │
 ├─ 📂 scripts/                      # Automation scripts
 │  ├─ create_db.py                  # Database initialization
-│  ├─ load_and_insert.py            # Direct data loading
+│  ├─ load_data.py                  # Database loading helper
 │  ├─ smoke_test_e2e.py             # E2E system tests
 │  ├─ validate_project.py           # Pre-flight checks
 │  ├─ init-db.sql                   # SQL initialization
@@ -136,7 +136,7 @@ transaction-pipeline/
 | `src/etl_pipeline.py` | Main ETL orchestration | `run_pipeline()`, workflow logic |
 | `src/validation.py` | Data validation | `validate_transactions()` |
 | `src/transform.py` | Data transformation | `transform_transactions()` |
-| `scripts/load_and_insert.py` | Direct loading | Alternative load method |
+| `src/load_data.py` | Database loading | Existing database loading helper |
 | `data/raw/transactions.csv` | Input data | Source CSV file |
 
 ---

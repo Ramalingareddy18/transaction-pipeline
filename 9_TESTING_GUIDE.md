@@ -207,7 +207,7 @@ def test_transactions_endpoint():
     """Verify /transactions endpoint works"""
     response = requests.get("http://127.0.0.1:8000/transactions")
     assert response.status_code == 200
-    assert 'data' in response.json()
+    assert isinstance(response.json(), list)
 ```
 
 **5. Anomaly Detection**
@@ -216,7 +216,7 @@ def test_anomaly_detection():
     """Verify anomaly detection works"""
     response = requests.get("http://127.0.0.1:8000/analytics/anomalies")
     assert response.status_code == 200
-    assert 'anomalies_detected' in response.json()
+    assert 'anomalies' in response.json()
 ```
 
 **6. Full Data Flow**
@@ -231,7 +231,7 @@ def test_full_data_flow():
     data = response.json()
     
     # Verify data
-    assert len(data['data']) > 0
+    assert len(data) > 0
 ```
 
 ---

@@ -19,7 +19,7 @@ pip install -r requirements.txt
 
 # 4. Copy and configure environment
 copy .env.example .env
-# Edit .env with your database credentials
+# Edit .env and set a unique local DB_PASSWORD before starting Docker
 
 # 5. Initialize database
 python scripts\create_db.py

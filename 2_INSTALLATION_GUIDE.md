@@ -150,7 +150,7 @@ DB_HOST=localhost          # Usually localhost for local dev
 DB_PORT=5432              # Default PostgreSQL port
 DB_NAME=transaction_pipeline_db   # Database name
 DB_USER=postgres          # PostgreSQL username
-DB_PASSWORD=Rheb@117      # PostgreSQL password (change if needed)
+DB_PASSWORD=replace-with-a-unique-local-password  # Set your local PostgreSQL password
 ```
 
 **Important**: Never commit `.env` to version control!
@@ -212,7 +212,7 @@ docker run -d \
   --name transaction_db \
   -e POSTGRES_DB=transaction_pipeline_db \
   -e POSTGRES_USER=postgres \
-  -e POSTGRES_PASSWORD=Rheb@117 \
+  -e POSTGRES_PASSWORD=replace-with-a-unique-local-password \
   -p 5432:5432 \
   postgres:16
 

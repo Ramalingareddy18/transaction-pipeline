@@ -171,7 +171,7 @@ psql -U postgres -d transaction_pipeline_db
 postgresql://username:password@host:port/database
 
 # For local development
-postgresql://postgres:Rheb@117@localhost:5432/transaction_pipeline_db
+postgresql://postgres:<your-password>@localhost:5432/transaction_pipeline_db
 ```
 
 ### Store Safely in .env
