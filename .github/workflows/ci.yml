@@ -100,12 +100,16 @@ jobs:
         tags: transaction-api:latest
     
     - name: Test Docker compose
+      env:
+        DB_PASSWORD: postgres
       run: |
-        docker-compose build
-        docker-compose up -d
-        sleep 20
-        docker-compose ps
-        docker-compose down
+        trap 'docker compose down --volumes' EXIT
+        docker compose build
+        if ! docker compose up -d --wait --wait-timeout 120; then
+          docker compose logs
+          exit 1
+        fi
+        docker compose ps
 
   security:
     runs-on: ubuntu-latest
@@ -152,7 +156,7 @@ jobs:
       DB_NAME: transaction_pipeline_db
       DB_USER: postgres
       DB_PASSWORD: postgres
-      PYTHONPATH: src
+      PYTHONPATH: .:src
     
     steps:
     - uses: actions/checkout@v3
