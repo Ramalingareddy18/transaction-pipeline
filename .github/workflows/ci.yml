@@ -130,6 +130,29 @@ jobs:
 
   quality:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: transaction_pipeline_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    env:
+      DB_HOST: localhost
+      DB_PORT: 5432
+      DB_NAME: transaction_pipeline_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      PYTHONPATH: src
     
     steps:
     - uses: actions/checkout@v3
@@ -145,7 +168,7 @@ jobs:
         pip install pylint coverage
     
     - name: Run pylint
-      run: pylint src/ app/ --disable=all --enable=E,F || true
+      run: pylint src/ app/ --disable=all --enable=E,F
     
     - name: Generate coverage report
       run: |

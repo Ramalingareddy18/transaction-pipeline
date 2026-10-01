@@ -1,4 +1,5 @@
 import pandas as pd
+
 from project_paths import find_csv_file, resolve_project_path
 
 RAW_FILE = str(find_csv_file())
@@ -22,10 +23,7 @@ print(df.duplicated().sum())
 print("\nColumns:")
 print(df.columns.tolist())
 
-df["amount"] = pd.to_numeric(
-    df["amount"],
-    errors="coerce"
-)
+df["amount"] = pd.to_numeric(df["amount"], errors="coerce")
 
 for column, formatter in [
     ("payment method", lambda s: s.astype(str).str.strip().str.upper()),
@@ -44,11 +42,7 @@ OUTPUT_DIR = resolve_project_path("data", "processed")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 OUTPUT_FILE = OUTPUT_DIR / "cleaned_transactions.csv"
 
-df.to_csv(
-    OUTPUT_FILE,
-    index=False
-)
+df.to_csv(OUTPUT_FILE, index=False)
 
 print("\nCleaned data saved successfully!")
 print("Output file:", OUTPUT_FILE)
-

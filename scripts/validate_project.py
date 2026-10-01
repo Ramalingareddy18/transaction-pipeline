@@ -15,7 +15,11 @@ import io
 import sys
 from pathlib import Path
 
-if hasattr(sys.stdout, "buffer") and sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+if (
+    hasattr(sys.stdout, "buffer")
+    and sys.stdout.encoding
+    and sys.stdout.encoding.lower() != "utf-8"
+):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -64,12 +68,15 @@ def check_project_structure():
             pass  # print(f"  ✓ {f}")
 
     if issues:
-        print(f"✗ Project structure issues found:")
+        print("✗ Project structure issues found:")
         for issue in issues:
             print(f"  - {issue}")
         return False
     else:
-        print(f"✓ Project structure is complete ({len(required_dirs)} dirs, {len(required_files)} files)")
+        print(
+            "✓ Project structure is complete "
+            f"({len(required_dirs)} dirs, {len(required_files)} files)"
+        )
         return True
 
 
@@ -77,7 +84,9 @@ def check_python_environment():
     """Verify Python version and critical dependencies."""
     print("\n[2/8] Checking Python environment...")
     if sys.version_info < (3, 11):
-        print(f"✗ Python 3.11+ required, found {sys.version_info.major}.{sys.version_info.minor}")
+        print(
+            f"✗ Python 3.11+ required, found {sys.version_info.major}.{sys.version_info.minor}"
+        )
         return False
 
     required_packages = [
@@ -104,7 +113,9 @@ def check_python_environment():
         print("  Run: pip install -r requirements.txt")
         return False
 
-    print(f"✓ Python {sys.version_info.major}.{sys.version_info.minor} with all required packages")
+    print(
+        f"✓ Python {sys.version_info.major}.{sys.version_info.minor} with all required packages"
+    )
     return True
 
 
@@ -113,6 +124,7 @@ def check_database_connectivity():
     print("\n[3/8] Checking database connectivity...")
     try:
         from database_connection import test_connection
+
         result = test_connection()
         if result:
             print("✓ Database connection successful")
@@ -133,6 +145,7 @@ def check_environment_file():
 
     try:
         from dotenv import dotenv_values
+
         env = dotenv_values(env_file)
         required_keys = ["DB_HOST", "DB_PORT", "DB_NAME", "DB_USER", "DB_PASSWORD"]
         missing = [k for k in required_keys if k not in env]
@@ -151,6 +164,7 @@ def check_data_files():
     print("\n[5/8] Checking data files...")
     try:
         from project_paths import find_csv_file
+
         csv_file = find_csv_file()
         if csv_file and csv_file.exists():
             print(f"✓ CSV file found: {csv_file}")
@@ -167,13 +181,14 @@ def check_database_schema():
     """Verify database schema and tables."""
     print("\n[6/8] Checking database schema...")
     try:
-        from database_config import build_database_url
         from sqlalchemy import create_engine, inspect
-        
+
+        from database_config import build_database_url
+
         engine = create_engine(build_database_url())
         inspector = inspect(engine)
         tables = inspector.get_table_names()
-        
+
         if "transactions" in tables:
             cols = [c["name"] for c in inspector.get_columns("transactions")]
             print(f"✓ Transactions table exists with {len(cols)} columns")
@@ -192,11 +207,13 @@ def check_api_imports():
     print("\n[7/8] Checking API imports...")
     try:
         import sys
+
         sys.path.insert(0, str(ROOT))
-        from app.main import app
-        from app.database import Transaction, SessionLocal
-        from app.schemas import TransactionRead
-        from app.health_check import check_api_health
+        from app.database import SessionLocal, Transaction  # noqa: F401
+        from app.health_check import check_api_health  # noqa: F401
+        from app.main import app  # noqa: F401
+        from app.schemas import TransactionRead  # noqa: F401
+
         print("✓ All API modules import successfully")
         return True
     except Exception as e:
@@ -208,10 +225,11 @@ def check_pipeline_modules():
     """Verify ETL pipeline modules."""
     print("\n[8/8] Checking pipeline modules...")
     try:
-        from validation import validate_transactions
-        from transform import transform_transactions
-        from etl_pipeline import run_pipeline
-        from anomaly_detection import detect_anomalies
+        from anomaly_detection import detect_anomalies  # noqa: F401
+        from etl_pipeline import run_pipeline  # noqa: F401
+        from transform import transform_transactions  # noqa: F401
+        from validation import validate_transactions  # noqa: F401
+
         print("✓ All pipeline modules import successfully")
         return True
     except Exception as e:

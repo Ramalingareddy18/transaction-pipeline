@@ -11,8 +11,9 @@ Provides comprehensive health diagnostics for:
 from datetime import datetime
 from typing import Any
 
-from app.database import SessionLocal
 from sqlalchemy import text
+
+from app.database import SessionLocal
 
 
 def check_database_health() -> dict[str, Any]:
@@ -20,9 +21,7 @@ def check_database_health() -> dict[str, Any]:
     try:
         with SessionLocal() as session:
             result = session.execute(text("SELECT version()")).scalar()
-            count = session.execute(
-                text("SELECT COUNT(*) FROM transactions")
-            ).scalar()
+            count = session.execute(text("SELECT COUNT(*) FROM transactions")).scalar()
             return {
                 "status": "healthy",
                 "version": result,
@@ -52,9 +51,7 @@ def check_data_quality() -> dict[str, Any]:
     """Check data quality in the database."""
     try:
         with SessionLocal() as session:
-            total = session.execute(
-                text("SELECT COUNT(*) FROM transactions")
-            ).scalar()
+            total = session.execute(text("SELECT COUNT(*) FROM transactions")).scalar()
             with_amount = session.execute(
                 text("SELECT COUNT(*) FROM transactions WHERE amount IS NOT NULL")
             ).scalar()
@@ -63,9 +60,7 @@ def check_data_quality() -> dict[str, Any]:
             ).scalar()
 
             quality_score = (
-                ((with_amount + with_category) / (total * 2) * 100)
-                if total > 0
-                else 0
+                ((with_amount + with_category) / (total * 2) * 100) if total > 0 else 0
             )
 
             return {

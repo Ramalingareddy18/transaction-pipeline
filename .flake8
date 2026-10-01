@@ -1,0 +1,5 @@
+[flake8]
+extend-ignore = E203, E402
+per-file-ignores =
+	dashboard.py:E501
+	scripts/generate_large_dataset.py:E501

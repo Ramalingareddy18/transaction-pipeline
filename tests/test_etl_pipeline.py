@@ -12,9 +12,7 @@ def test_ensure_transactions_table_creates_schema_and_is_repeatable():
         ensure_transactions_table(connection)
         ensure_transactions_table(connection)
 
-    columns = {
-        column["name"] for column in inspect(engine).get_columns("transactions")
-    }
+    columns = {column["name"] for column in inspect(engine).get_columns("transactions")}
     assert columns == {
         "transaction_id",
         "date",
@@ -42,9 +40,7 @@ def test_ensure_transactions_table_adds_missing_optional_columns():
         )
         ensure_transactions_table(connection)
 
-    columns = {
-        column["name"] for column in inspect(engine).get_columns("transactions")
-    }
+    columns = {column["name"] for column in inspect(engine).get_columns("transactions")}
     assert "year" in columns
     assert "description" in columns
     engine.dispose()

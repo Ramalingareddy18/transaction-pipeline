@@ -3,7 +3,9 @@ from urllib.parse import quote_plus
 
 try:
     from dotenv import load_dotenv
+
     from project_paths import PROJECT_ROOT
+
     load_dotenv(dotenv_path=PROJECT_ROOT / ".env")
 except Exception:
     # Ignore if dotenv is unavailable or the project path isn't importable yet.
@@ -19,7 +21,8 @@ def get_db_settings(database_name=None):
 
     if not db_password:
         raise RuntimeError(
-            "DB_PASSWORD environment variable is not set. Create a .env file in the project root with DB_PASSWORD."
+            "DB_PASSWORD environment variable is not set. "
+            "Create a .env file in the project root with DB_PASSWORD."
         )
 
     return {

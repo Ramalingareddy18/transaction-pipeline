@@ -20,7 +20,17 @@ def validate_transactions(df: pd.DataFrame) -> pd.DataFrame:
     cleaned = cleaned.drop_duplicates(subset=["transaction_id"], keep="last")
     cleaned["amount"] = pd.to_numeric(cleaned["amount"], errors="coerce")
     cleaned["date"] = pd.to_datetime(cleaned["date"], errors="coerce")
-    cleaned = cleaned.dropna(subset=["transaction_id", "date", "description", "amount", "currency", "category", "account"])
+    cleaned = cleaned.dropna(
+        subset=[
+            "transaction_id",
+            "date",
+            "description",
+            "amount",
+            "currency",
+            "category",
+            "account",
+        ]
+    )
 
     cleaned["currency"] = cleaned["currency"].astype(str).str.strip().str.upper()
     cleaned["category"] = cleaned["category"].astype(str).str.strip().str.title()

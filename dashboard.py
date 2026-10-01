@@ -23,11 +23,12 @@ st.set_page_config(
     page_title="Transaction Intelligence & Anomaly Portal",
     page_icon="⚡",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 # Premium Custom CSS Design System
-st.markdown("""
+st.markdown(
+    """
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap');
 
@@ -38,7 +39,7 @@ st.markdown("""
     /* Main background */
     .stApp {
         background-color: #0b0f19;
-        background-image: 
+        background-image:
             radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.12) 0px, transparent 50%),
             radial-gradient(at 90% 80%, rgba(168, 85, 247, 0.10) 0px, transparent 50%),
             radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
@@ -142,10 +143,13 @@ st.markdown("""
         box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
 </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # Custom Header Banner
-st.markdown("""
+st.markdown(
+    """
 <div class="portal-header">
     <div>
         <h1 class="portal-title">⚡ Transaction Intelligence & ML Portal</h1>
@@ -155,7 +159,9 @@ st.markdown("""
         <span class="status-badge">🟢 System Online & ML Active</span>
     </div>
 </div>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 transactions = None
 fetch_error = None
@@ -173,8 +179,10 @@ except Exception as exc:
 # Attempt 2: Direct Database Fallback if API is offline
 if transactions is None:
     try:
-        from app.database import SessionLocal, Transaction
         from sqlalchemy import select
+
+        from app.database import SessionLocal, Transaction
+
         with SessionLocal() as session:
             rows = session.execute(select(Transaction)).scalars().all()
             transactions = [
@@ -199,14 +207,26 @@ if transactions is None:
         fetch_error += f" | Direct DB Fallback: {db_exc}"
 
 if transactions is None:
-    st.error(f"❌ Unable to load transactions data.")
-    st.warning("Please ensure PostgreSQL database is running or launch the backend API.")
+    local_data_file = ROOT / "data" / "processed" / "cleaned_transactions.csv"
+    try:
+        transactions = pd.read_csv(local_data_file).to_dict(orient="records")
+        data_source = "Local CSV"
+    except Exception as csv_exc:
+        fetch_error += f" | Local CSV Fallback: {csv_exc}"
+
+if transactions is None:
+    st.error("❌ Unable to load transactions data.")
+    st.warning(
+        "Please ensure PostgreSQL database is running or launch the backend API."
+    )
     if st.button("🔄 Retry Connection"):
         st.rerun()
     st.stop()
 
 if not transactions:
-    st.warning("⚠️ No transactions found in the database. Run the ETL pipeline to load data:")
+    st.warning(
+        "⚠️ No transactions found in the database. Run the ETL pipeline to load data:"
+    )
     st.code("python src/etl_pipeline.py")
     if st.button("🔄 Refresh Data"):
         st.rerun()
@@ -241,13 +261,17 @@ col1, col2, col3, col4, col5 = st.columns(5)
 col1.metric("TOTAL VOLUME", f"${frame['amount'].sum():,.2f}")
 col2.metric("TRANSACTIONS", f"{len(frame):,}")
 col3.metric("AVERAGE AMOUNT", f"${frame['amount'].mean():,.2f}")
-col4.metric("🚨 ML ANOMALIES", f"{anomaly_count} ({anomaly_count / len(frame) * 100:.1f}%)")
+col4.metric(
+    "🚨 ML ANOMALIES", f"{anomaly_count} ({anomaly_count / len(frame) * 100:.1f}%)"
+)
 col5.metric("DATA SOURCE", data_source)
 
 st.markdown("<br>", unsafe_allow_html=True)
 
 # Main Navigation Tabs
-tab_analytics, tab_ml, tab_explorer = st.tabs(["📊 Analytics Overview", "🤖 ML Anomaly Detection", "🔍 Transactions Explorer"])
+tab_analytics, tab_ml, tab_explorer = st.tabs(
+    ["📊 Analytics Overview", "🤖 ML Anomaly Detection", "🔍 Transactions Explorer"]
+)
 
 with tab_analytics:
     col_left, col_right = st.columns(2)
@@ -255,7 +279,9 @@ with tab_analytics:
     with col_left:
         st.markdown("#### 💰 Spending Breakdown by Category")
         if "category" in frame.columns:
-            category_totals = frame.groupby("category", dropna=False)["amount"].sum().reset_index()
+            category_totals = (
+                frame.groupby("category", dropna=False)["amount"].sum().reset_index()
+            )
             fig_bar = px.bar(
                 category_totals,
                 x="category",
@@ -263,9 +289,11 @@ with tab_analytics:
                 labels={"category": "Category", "amount": "Total ($)"},
                 color="category",
                 template="plotly_dark",
-                color_discrete_sequence=px.colors.qualitative.Bold
+                color_discrete_sequence=px.colors.qualitative.Bold,
             )
-            fig_bar.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+            fig_bar.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
+            )
             st.plotly_chart(fig_bar, use_container_width=True)
 
     with col_right:
@@ -279,20 +307,28 @@ with tab_analytics:
                 y="amount",
                 labels={"date": "Date", "amount": "Amount ($)"},
                 template="plotly_dark",
-                markers=True
+                markers=True,
             )
-            fig_line.update_traces(line_color="#6366f1", fillcolor="rgba(99, 102, 241, 0.2)")
-            fig_line.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+            fig_line.update_traces(
+                line_color="#6366f1", fillcolor="rgba(99, 102, 241, 0.2)"
+            )
+            fig_line.update_layout(
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
+            )
             st.plotly_chart(fig_line, use_container_width=True)
 
 with tab_ml:
     st.markdown("#### 🚨 Machine Learning Outlier Detection (Isolation Forest)")
-    st.info("The Isolation Forest algorithm isolates anomalous transactions by randomly selecting a feature and splitting values.")
+    st.info(
+        "The Isolation Forest algorithm isolates anomalous transactions by randomly selecting a feature and splitting values."
+    )
 
     col_m1, col_m2 = st.columns([1, 2])
 
     with col_m1:
-        st.error(f"⚠️ **{anomaly_count} Outliers Flagged** out of {len(frame)} records.")
+        st.error(
+            f"⚠️ **{anomaly_count} Outliers Flagged** out of {len(frame)} records."
+        )
         flagged_df = df_anomalies[df_anomalies["is_anomaly"]]
         if not flagged_df.empty:
             st.markdown("##### High Severity Transactions:")
@@ -314,17 +350,34 @@ with tab_ml:
             color_discrete_map={True: "#ef4444", False: "#3b82f6"},
             hover_data=["description", "category", "anomaly_score"],
             template="plotly_dark",
-            title="Transaction Amount Distribution & ML Classification"
+            title="Transaction Amount Distribution & ML Classification",
         )
         fig_scatter.update_traces(marker=dict(size=12, opacity=0.85))
-        fig_scatter.update_layout(paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
+        fig_scatter.update_layout(
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)"
+        )
         st.plotly_chart(fig_scatter, use_container_width=True)
 
 with tab_explorer:
     st.markdown("#### 🔍 Real-Time Transactions Grid")
-    display_df = df_anomalies[df_anomalies["is_anomaly"]] if show_only_anomalies else df_anomalies
+    display_df = (
+        df_anomalies[df_anomalies["is_anomaly"]]
+        if show_only_anomalies
+        else df_anomalies
+    )
     cols_to_show = [
-        c for c in ["transaction_id", "date", "description", "amount", "currency", "category", "account", "is_anomaly", "anomaly_score"]
+        c
+        for c in [
+            "transaction_id",
+            "date",
+            "description",
+            "amount",
+            "currency",
+            "category",
+            "account",
+            "is_anomaly",
+            "anomaly_score",
+        ]
         if c in display_df.columns
     ]
     st.dataframe(display_df[cols_to_show], use_container_width=True)

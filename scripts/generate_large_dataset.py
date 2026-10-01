@@ -11,7 +11,6 @@ Generates 100,000 to 1,000,000+ realistic transaction records with:
 
 import argparse
 import io
-import os
 import sys
 import time
 from pathlib import Path
@@ -19,7 +18,11 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-if hasattr(sys.stdout, "buffer") and sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+if (
+    hasattr(sys.stdout, "buffer")
+    and sys.stdout.encoding
+    and sys.stdout.encoding.lower() != "utf-8"
+):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -119,18 +122,21 @@ def generate_dataset(num_records=100000):
         ],
     }
 
-    accounts = ["Checking Account", "Savings Account", "Credit Card", "Investment Account"]
-    currencies = ["USD"]
-
+    accounts = [
+        "Checking Account",
+        "Savings Account",
+        "Credit Card",
+        "Investment Account",
+    ]
     # Category probabilities
     categories = list(category_templates.keys())
     cat_weights = [0.05, 0.25, 0.20, 0.08, 0.15, 0.12, 0.06, 0.04, 0.02, 0.03]
 
     chosen_cats = np.random.choice(categories, size=num_records, p=cat_weights)
-    
+
     descriptions = []
     amounts = []
-    
+
     for cat in chosen_cats:
         options = category_templates[cat]
         desc = np.random.choice(options)
@@ -152,26 +158,32 @@ def generate_dataset(num_records=100000):
             amt = -np.round(np.random.normal(350, 150), 2)
         else:
             amt = -np.round(np.random.exponential(scale=35), 2)
-        
+
         amounts.append(amt)
 
     # Dates spanning past 2 years up to current date
     start_date = pd.to_datetime("2024-01-01")
     end_date = pd.to_datetime("2026-08-19")
-    random_days = np.random.randint(0, (end_date - start_date).days + 1, size=num_records)
+    random_days = np.random.randint(
+        0, (end_date - start_date).days + 1, size=num_records
+    )
     dates = start_date + pd.to_timedelta(random_days, unit="D")
 
-    chosen_accounts = np.random.choice(accounts, size=num_records, p=[0.45, 0.20, 0.30, 0.05])
+    chosen_accounts = np.random.choice(
+        accounts, size=num_records, p=[0.45, 0.20, 0.30, 0.05]
+    )
 
-    df = pd.DataFrame({
-        "transaction_id": np.arange(1, num_records + 1),
-        "date": dates.strftime("%Y-%m-%d"),
-        "description": descriptions,
-        "amount": amounts,
-        "currency": "USD",
-        "category": chosen_cats,
-        "account": chosen_accounts,
-    })
+    df = pd.DataFrame(
+        {
+            "transaction_id": np.arange(1, num_records + 1),
+            "date": dates.strftime("%Y-%m-%d"),
+            "description": descriptions,
+            "amount": amounts,
+            "currency": "USD",
+            "category": chosen_cats,
+            "account": chosen_accounts,
+        }
+    )
 
     # Inject Machine Learning Anomalies (~0.5% explicit extreme outliers)
     num_anomalies = max(10, int(num_records * 0.005))
@@ -216,11 +228,18 @@ def generate_dataset(num_records=100000):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate transaction dataset.")
-    parser.add_argument("--count", type=int, default=100000, help="Number of records to generate (default: 100,000)")
+    parser.add_argument(
+        "--count",
+        type=int,
+        default=100000,
+        help="Number of records to generate (default: 100,000)",
+    )
     args = parser.parse_args()
 
     df = generate_dataset(num_records=args.count)
 
     print("\n🚀 Executing ETL pipeline to bulk load dataset into PostgreSQL...")
     run_pipeline(csv_path=str(resolve_project_path("data", "transactions.csv")))
-    print("\n🎉 Bulk load complete! Enterprise dataset is live in PostgreSQL and Dashboard!")
+    print(
+        "\n🎉 Bulk load complete! Enterprise dataset is live in PostgreSQL and Dashboard!"
+    )

@@ -17,7 +17,11 @@ from pathlib import Path
 
 import requests
 
-if hasattr(sys.stdout, "buffer") and sys.stdout.encoding and sys.stdout.encoding.lower() != "utf-8":
+if (
+    hasattr(sys.stdout, "buffer")
+    and sys.stdout.encoding
+    and sys.stdout.encoding.lower() != "utf-8"
+):
     sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -29,7 +33,6 @@ if str(SRC) not in sys.path:
 
 from database_connection import test_connection
 from etl_pipeline import run_pipeline
-from anomaly_detection import detect_anomalies
 
 
 def test_database_connectivity():

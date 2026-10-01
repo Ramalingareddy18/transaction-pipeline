@@ -5,7 +5,6 @@ from airflow.operators.python import PythonOperator
 
 from src.etl_pipeline import run_pipeline
 
-
 default_args = {
     "owner": "data-team",
     "depends_on_past": False,

@@ -70,7 +70,11 @@ if __name__ == "__main__":
 
     if not os.path.exists(file_path):
         print(f"File not found: {file_path}")
-        print("Place your CSV at that path or run:\n  python src\\load_data.py <path/to/transactions.csv>\nOr set environment variable CSV_PATH")
+        print(
+            "Place your CSV at that path or run:\n"
+            "  python src\\load_data.py <path/to/transactions.csv>\n"
+            "Or set environment variable CSV_PATH"
+        )
         sys.exit(1)
 
     df = load_csv_to_db(file_path)

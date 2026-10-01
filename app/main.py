@@ -15,7 +15,7 @@ if str(SRC) not in sys.path:
 
 from anomaly_detection import detect_anomalies
 from app.database import SessionLocal, Transaction
-from app.health_check import check_api_health, check_database_health, check_data_quality
+from app.health_check import check_api_health, check_data_quality, check_database_health
 from app.schemas import TransactionRead
 
 app = FastAPI(
@@ -171,4 +171,3 @@ def root():
             "docs": "/docs",
         },
     }
-

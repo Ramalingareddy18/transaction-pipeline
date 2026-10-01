@@ -48,17 +48,16 @@ def ensure_transactions_table(connection):
 
     inspector = inspect(connection)
     existing = {
-        column["name"].lower()
-        for column in inspector.get_columns("transactions")
+        column["name"].lower() for column in inspector.get_columns("transactions")
     }
     if "transaction_id" not in existing:
         raise RuntimeError(
             "The existing transactions table has no transaction_id key; "
             "migrate it explicitly before loading data."
         )
-    primary_key = inspector.get_pk_constraint("transactions").get(
-        "constrained_columns"
-    ) or []
+    primary_key = (
+        inspector.get_pk_constraint("transactions").get("constrained_columns") or []
+    )
     unique_keys = [
         constraint.get("column_names") or []
         for constraint in inspector.get_unique_constraints("transactions")
@@ -79,9 +78,7 @@ def ensure_transactions_table(connection):
     for column_name, column_type in expected_columns.items():
         if column_name not in existing:
             connection.execute(
-                text(
-                    f"ALTER TABLE transactions ADD COLUMN {column_name} {column_type}"
-                )
+                text(f"ALTER TABLE transactions ADD COLUMN {column_name} {column_type}")
             )
 
 

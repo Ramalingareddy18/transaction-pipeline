@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+
 from app.main import app
 
 client = TestClient(app)
@@ -19,4 +20,3 @@ def test_transactions_endpoint_returns_data():
     for transaction in payload:
         assert "transaction_id" in transaction
         assert "amount" in transaction
-

@@ -31,4 +31,4 @@ if __name__ == "__main__":
         cursor.execute("SELECT version();")
         print(cursor.fetchone())
 
-    test_connection()    
+    test_connection()
